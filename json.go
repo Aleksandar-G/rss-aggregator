@@ -36,11 +36,14 @@ func respondWithError(w http.ResponseWriter, responseCode int, errMsg string) {
 
 	// Checks if it is a server error
 	if responseCode > 499 {
-		log.Printf("Responding with error code:%d and error message %v\n", responseCode, errMsg)
+		log.Printf("Responding with error code: %d and error message %v\n", responseCode, errMsg)
+		respondWithJSON(w, responseCode, errorResponse{
+			Error: "Internal server error",
+		})
 		return
 	}
 
-	// Create the Jsonresponse
+	// Create the JSON response
 	respondWithJSON(w, responseCode, errorResponse{
 		Error: errMsg,
 	})
