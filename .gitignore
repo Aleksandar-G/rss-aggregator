@@ -1,2 +1,5 @@
 .env
 rss-aggregator
+testdb
+Makefile
+main
