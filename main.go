@@ -61,13 +61,22 @@ func main() {
 	// V1 router
 	v1Router := chi.NewRouter()
 
-	// Mount the V1 Router to the mainRouter on the `/v1` path
-	mainRouter.Mount("/v1", v1Router)
-
 	// Endpoints for the V1 router
 	v1Router.Get("/healthz", handlerReadiness)
 	v1Router.Get("/err", handlerErr)
-	v1Router.Post("/users", apiCfg.handlerCreateUser)
+
+	// Mount the V1 Router to the mainRouter on the `/v1` path
+	mainRouter.Mount("/v1", v1Router)
+
+	// Users router
+	userRouter := chi.NewRouter()
+	userRouter.Get("/{id}", apiCfg.handlerGetUser)
+	userRouter.Get("/", apiCfg.handlerListUsers)
+	userRouter.Post("/", apiCfg.handlerCreateUser)
+	userRouter.Delete("/{id}", apiCfg.handlerDeleteUser)
+
+	// Mount the user ROuter to the v1Router
+	v1Router.Mount("/users", userRouter)
 
 	// Create a server
 	server := &http.Server{

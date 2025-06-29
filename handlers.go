@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Aleksandar-G/rss-aggregator/internal/database"
+	"github.com/go-chi/chi"
 	"github.com/google/uuid"
 )
 
@@ -40,7 +41,7 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 
 	err := jsonDecoder.Decode(&params)
 	if err != nil {
-		respondWithError(w, 401, "Not a valid body")
+		respondWithError(w, http.StatusBadRequest, "Not a valid body")
 		return
 	}
 
@@ -60,5 +61,64 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 	user := databaseUserToUser(dbUser)
 
 	// Return a successful response
+	respondWithJSON(w, http.StatusCreated, user)
+}
+
+func (apiCfg *apiConfig) handlerDeleteUser(w http.ResponseWriter, r *http.Request) {
+	userId := chi.URLParam(r, "id")
+	if userId == "" {
+		respondWithError(w, http.StatusBadRequest, "Id is not passed")
+		return
+	}
+
+	err := apiCfg.DB.DeleteUser(r.Context(), userId)
+	if err != nil {
+		respondWithError(w, 500, err.Error())
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, struct {
+		Status string `json:"status"`
+	}{
+		Status: "resource deleted",
+	})
+}
+
+func (apiCfg *apiConfig) handlerGetUser(w http.ResponseWriter, r *http.Request) {
+	userId := chi.URLParam(r, "id")
+	if userId == "" {
+		respondWithError(w, http.StatusBadRequest, "Id is not passed")
+		return
+	}
+
+	// Fetch the user from the database
+	dbUser, err := apiCfg.DB.GetUserById(r.Context(), userId)
+	if err != nil {
+		respondWithError(w, 500, err.Error())
+		return
+	}
+	// Convert database user to models user
+	user := databaseUserToUser(dbUser)
+
+	// Return response with user in body
 	respondWithJSON(w, http.StatusOK, user)
+}
+
+func (apiCfg *apiConfig) handlerListUsers(w http.ResponseWriter, r *http.Request) {
+
+	// Fetch the user from the database
+	dbUsers, err := apiCfg.DB.ListUsers(r.Context())
+	if err != nil {
+		respondWithError(w, 500, err.Error())
+		return
+	}
+	// Convert database user to models user
+	var users []User
+
+	for _, dbUser := range dbUsers {
+		users = append(users, databaseUserToUser(dbUser))
+	}
+
+	// Return response with user in body
+	respondWithJSON(w, http.StatusOK, users)
 }
