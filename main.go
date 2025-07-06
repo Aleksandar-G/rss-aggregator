@@ -1,22 +1,17 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/Aleksandar-G/rss-aggregator/internal/database"
+	"github.com/Aleksandar-G/rss-aggregator/internal/handlers"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 
 	_ "modernc.org/sqlite"
 )
-
-type apiConfig struct {
-	DB *database.Queries
-}
 
 func main() {
 	// Load environment variables
@@ -30,21 +25,7 @@ func main() {
 		log.Fatal("PORT is not set")
 	}
 
-	dbUrl := os.Getenv("DB_URL")
-	if dbUrl == "" {
-		log.Fatal("DB_URL is not set")
-	}
-
-	// Open a connection to the database
-	conn, err := sql.Open("sqlite", dbUrl)
-	if err != nil {
-		log.Fatal("Cannot open a connection to the database")
-	}
-
-	apiCfg := apiConfig{
-		DB: database.New(conn),
-	}
-
+	userHandler := handlers.NewUserHandler()
 	// Main base router
 	mainRouter := chi.NewRouter()
 
@@ -62,18 +43,18 @@ func main() {
 	v1Router := chi.NewRouter()
 
 	// Endpoints for the V1 router
-	v1Router.Get("/healthz", handlerReadiness)
-	v1Router.Get("/err", handlerErr)
+	v1Router.Get("/healthz", handlers.HandlerReadiness)
+	v1Router.Get("/err", handlers.HandlerErr)
 
 	// Mount the V1 Router to the mainRouter on the `/v1` path
 	mainRouter.Mount("/v1", v1Router)
 
 	// Users router
 	userRouter := chi.NewRouter()
-	userRouter.Get("/{id}", apiCfg.handlerGetUser)
-	userRouter.Get("/", apiCfg.handlerListUsers)
-	userRouter.Post("/", apiCfg.handlerCreateUser)
-	userRouter.Delete("/{id}", apiCfg.handlerDeleteUser)
+	userRouter.Get("/{id}", userHandler.HandlerGetUser)
+	userRouter.Get("/", userHandler.HandlerListUsers)
+	userRouter.Post("/", userHandler.HandlerCreateUser)
+	userRouter.Delete("/{id}", userHandler.HandlerDeleteUser)
 
 	// Mount the user ROuter to the v1Router
 	v1Router.Mount("/users", userRouter)

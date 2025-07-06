@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 )
 
 // Get `ResponseWriter`, `responseCode` and `payload` and marshal an json response to be send to the client
-func respondWithJSON(w http.ResponseWriter, responseCode int, payload interface{}) {
+func RespondWithJSON(w http.ResponseWriter, responseCode int, payload interface{}) {
 	// Set response header to json
 	w.Header().Set("Content-Type", "application/json")
 
@@ -27,7 +27,7 @@ func respondWithJSON(w http.ResponseWriter, responseCode int, payload interface{
 }
 
 // Get `ResponseWriter`, `responseCode` and `errMsg` and create an error response to be send to the client
-func respondWithError(w http.ResponseWriter, responseCode int, errMsg string) {
+func RespondWithError(w http.ResponseWriter, responseCode int, errMsg string) {
 
 	// Create en errorResponse struct so that the it implements the error interface
 	type errorResponse struct {
@@ -37,14 +37,25 @@ func respondWithError(w http.ResponseWriter, responseCode int, errMsg string) {
 	// Checks if it is a server error
 	if responseCode > 499 {
 		log.Printf("Internal error has occurred error message: %v\n", errMsg)
-		respondWithJSON(w, 500, errorResponse{
+		RespondWithJSON(w, 500, errorResponse{
 			Error: "Internal server error",
 		})
 		return
 	}
 
 	// Create the JSON response
-	respondWithJSON(w, responseCode, errorResponse{
+	RespondWithJSON(w, responseCode, errorResponse{
 		Error: errMsg,
 	})
+}
+
+func DecodeRequestBody[V any](r *http.Request, parameters V) (*V, error) {
+	// Decode the request body and convert to `parameters` struct
+	jsonDecoder := json.NewDecoder(r.Body)
+
+	err := jsonDecoder.Decode(&parameters)
+	if err != nil {
+		return nil, err
+	}
+	return &parameters, nil
 }
