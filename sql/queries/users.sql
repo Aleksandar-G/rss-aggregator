@@ -17,7 +17,7 @@ WHERE ID = ? LIMIT 1;
 -- name: ListUsers :many
 SELECT * FROM users;
 
--- name: UpdateAuthor :exec
+-- name: UpdateUser :exec
 UPDATE users
 SET name = ?
 WHERE id = ?;
