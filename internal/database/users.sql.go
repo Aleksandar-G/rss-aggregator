@@ -115,18 +115,18 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
-const updateAuthor = `-- name: UpdateAuthor :exec
+const updateUser = `-- name: UpdateUser :exec
 UPDATE users
 SET name = ?
 WHERE id = ?
 `
 
-type UpdateAuthorParams struct {
+type UpdateUserParams struct {
 	Name string
 	ID   interface{}
 }
 
-func (q *Queries) UpdateAuthor(ctx context.Context, arg UpdateAuthorParams) error {
-	_, err := q.db.ExecContext(ctx, updateAuthor, arg.Name, arg.ID)
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.db.ExecContext(ctx, updateUser, arg.Name, arg.ID)
 	return err
 }
