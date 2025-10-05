@@ -22,3 +22,11 @@ type User struct {
 	UpdatedAt time.Time
 	Name      string
 }
+
+type UsersFeed struct {
+	ID        interface{}
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	UserID    interface{}
+	FeedID    interface{}
+}

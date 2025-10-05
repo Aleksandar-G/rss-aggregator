@@ -27,6 +27,8 @@ func main() {
 
 	userHandler := handlers.NewUserHandler()
 	feedHandler := handlers.NewFeedHandler()
+	userFeedHandler := handlers.NewUserFeedHandler()
+
 	// Main base router
 	mainRouter := chi.NewRouter()
 
@@ -50,23 +52,31 @@ func main() {
 	// Mount the V1 Router to the mainRouter on the `/v1` path
 	mainRouter.Mount("/v1", v1Router)
 
-	// Users router
+	// Users router and endpoints
 	userRouter := chi.NewRouter()
 	userRouter.Get("/{id}", userHandler.HandlerGetUser)
 	userRouter.Get("/", userHandler.HandlerListUsers)
 	userRouter.Post("/", userHandler.HandlerCreateUser)
 	userRouter.Delete("/{id}", userHandler.HandlerDeleteUser)
 
-	// Feeds router
+	// Feeds router and endpoints
 	feedRouter := chi.NewRouter()
 	feedRouter.Get("/{id}", feedHandler.HandlerGetFeed)
 	feedRouter.Get("/", feedHandler.HandlerListFeeds)
 	feedRouter.Post("/", feedHandler.HandlerCreateFeed)
 	feedRouter.Delete("/{id}", feedHandler.HandlerDeleteFeed)
 
+	// UserFeeds router and endpoints
+	userFeedRouter := chi.NewRouter()
+	userFeedRouter.Get("/{id}", userFeedHandler.HandlerGetUserFeed)
+	userFeedRouter.Get("/", userFeedHandler.HandlerListUserFeeds)
+	userFeedRouter.Post("/", userFeedHandler.HandlerCreateUserFeed)
+	userFeedRouter.Delete("/{id}", userFeedHandler.HandlerDeleteUserFeed)
+
 	// Mount the user Router to the v1Router
 	v1Router.Mount("/users", userRouter)
 	v1Router.Mount("/feeds", feedRouter)
+	v1Router.Mount("/user_feed", userFeedRouter)
 
 	// Create a server
 	server := &http.Server{
