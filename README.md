@@ -55,3 +55,5 @@ List the core functionalities of your server. This immediately tells a potential
 | `GET`   | `/v1/err`           | Test endpoint to check error page   |
 
 ## License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
